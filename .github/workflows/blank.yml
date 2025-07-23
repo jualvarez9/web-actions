@@ -1,37 +1,39 @@
 name: Deploy Website
 
-# Cuándo se ejecuta
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # Permite ejecutar manualmente
+  workflow_dispatch:
 
-# ✅ Permisos necesarios para GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Jobs a ejecutar
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-      # 1. Descargar el código
       - name: Checkout repository
         uses: actions/checkout@v4
         
-      # 2. Mostrar archivos (opcional, para debug)
       - name: List files
         run: |
           echo "📁 Archivos en el repositorio:"
           ls -la
-          
-      # 3. Desplegar a GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
-          commit_message: "🚀 Deploy website"
+          path: './'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
